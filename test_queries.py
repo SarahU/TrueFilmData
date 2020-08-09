@@ -15,6 +15,10 @@ class TestQueries(unittest.TestCase):
         result = report.budget_vs_revenue()
         self.assertTrue('budget_revenue_ratio' in result.columns)
 
+    def test_read_movie_names(self):
+        result = report.read_movie_names()
+        self.assertEqual(42278, len(result))
+
 
 if __name__ == '__main__':
     unittest.main()
