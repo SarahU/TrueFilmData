@@ -1,6 +1,9 @@
 import xml.etree.ElementTree as ET
 import csv
 
+WIKIPEDIA_DATA_FILE_PATH = './data/enwiki-latest-abstract.xml'
+WIKI_MOVIE_OUTPUT_FILE_PATH = './data/wiki_movie_data.csv'
+
 
 class WikipediaDataFeed:
     def __init__(self, movieDataSource):
@@ -9,17 +12,17 @@ class WikipediaDataFeed:
     def update_wikipedia_data_source(self):
         movie_name_list = self.movieSource.read_movie_names()
         # path = './data/enwiki-latest-abstract.xml.gz'
-        path = './data/enwiki-latest-abstract.xml'
+
         # with gzip.open(path, 'rb') as f:
         #     file_content = f.read()
 
         element_collection = []
 
-        with open('./data/wiki_movie_data.csv', 'w', encoding="utf-8") as csvfile:
+        with open(WIKI_MOVIE_OUTPUT_FILE_PATH, 'w', encoding="utf-8") as csvfile:
             csvwriter = csv.writer(csvfile)
             csvwriter.writerow(['Title', 'Abstract', 'URL'])
 
-            context = ET.iterparse(path, events=("start", "end"))
+            context = ET.iterparse(WIKIPEDIA_DATA_FILE_PATH, events=("start", "end"))
 
             event, root = next(context)
             for event, elem in context:
