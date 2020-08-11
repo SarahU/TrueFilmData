@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 import csv
 
+
 class WikipediaDataFeed:
     def __init__(self, movieDataSource):
         self.movieSource = movieDataSource

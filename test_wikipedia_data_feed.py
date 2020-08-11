@@ -15,5 +15,6 @@ class TestWikipediaDataFeed(unittest.TestCase):
         data = pd.read_csv('./data/wiki_movie_data.csv')
         self.assertTrue((29193, 3), data.shape)
 
+
 if __name__ == '__main__':
     unittest.main()

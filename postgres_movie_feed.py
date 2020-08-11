@@ -10,11 +10,11 @@ class WikiMovieDBLoader:
     def __init__(self, moviesDataSource):
         self.movieSource = moviesDataSource
 
-    def get_wiki_data_for_movies(self):
+    def get_all_movie_data(self):
         imdb_movies_data = self.movieSource.get_data_with_budget_vs_revenue()
         wiki_movie_data = self.movieSource.get_movie_wikipedia_data()
 
-        full_set = imdb_movies_data.merge(wiki_movie_data, left_on='title', right_on='Title', suffixes=('_imdb', '_wiki'))
+        full_set = imdb_movies_data.merge(wiki_movie_data, how='left', left_on='title', right_on='Title')
 
         full_set.drop(['Title'], axis=1, inplace=True)
 
@@ -28,7 +28,7 @@ class WikiMovieDBLoader:
             return FAKE_YEAR_PLACEHOLDER
 
     def get_by_highest_to_lowest_ratio_top_1000(self):
-        df = self.get_wiki_data_for_movies().sort_values(by=['budget_revenue_ratio'])
+        df = self.get_all_movie_data().sort_values(by=['budget_revenue_ratio'])
 
         df['year'] = df.apply(lambda row: self.get_year(row.release_date), axis=1)
         df = df.drop(df[df.year == FAKE_YEAR_PLACEHOLDER].index)
