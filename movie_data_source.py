@@ -5,7 +5,10 @@ MOVIES_PATH = './data/3405_6663_compressed_movies_metadata.csv.zip'
 
 class MovieDataSource:
 
-    def get_data(self):
+    def get_movie_wikipedia_data(self):
+        return pd.read_csv('./data/wiki_movie_data.csv')
+
+    def get_imdb_movie_data(self):
         movie_data = pd.read_csv(MOVIES_PATH, compression='zip', parse_dates=['release_date'])
 
         movie_data = movie_data.drop_duplicates()
@@ -22,13 +25,13 @@ class MovieDataSource:
         return movie_data
 
     def read_movie_names(self):
-        movies = self.get_data()
+        movies = self.get_imdb_movie_data()
         names = movies['title'].unique()
 
         return names
 
     def get_data_with_budget_vs_revenue(self):
-        movies_data = self.get_data()
+        movies_data = self.get_imdb_movie_data()
 
         movies_data['budget_revenue_ratio'] = movies_data.apply(lambda row: (row.budget / row.revenue) * 100, axis=1)
         return movies_data

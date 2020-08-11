@@ -1,21 +1,22 @@
 from datetime import datetime
 from sqlalchemy import create_engine, MetaData, Table, Column, Float, Integer, String, inspect
+import pandas as pd
 
 TOP_MOVES_TABLE = "top_movies"
 FAKE_YEAR_PLACEHOLDER = 1111
 
 
 class WikiMovieDBLoader:
-    def __init__(self, moviesDataSource, wikipediaDataSource):
+    def __init__(self, moviesDataSource):
         self.movieSource = moviesDataSource
-        self.wikipediaMoviesSource = wikipediaDataSource
 
     def get_wiki_data_for_movies(self):
         imdb_movies_data = self.movieSource.get_data_with_budget_vs_revenue()
-        wiki_movie_data = self.wikipediaMoviesSource.get_data()
+        wiki_movie_data = self.movieSource.get_movie_wikipedia_data()
 
-        full_set = imdb_movies_data.join(wiki_movie_data, lsuffix='title', rsuffix='Title', )
-        print(full_set.columns)
+        full_set = imdb_movies_data.merge(wiki_movie_data, left_on='title', right_on='Title', suffixes=('_imdb', '_wiki'))
+
+        full_set.drop(['Title'], axis=1, inplace=True)
 
         return full_set
 
@@ -35,7 +36,7 @@ class WikiMovieDBLoader:
         df = df.head(1000)
 
         df = df[
-            ['Title', 'budget', 'year', 'revenue', 'vote_average', 'budget_revenue_ratio', 'production_companies',
+            ['title', 'budget', 'year', 'revenue', 'vote_average', 'budget_revenue_ratio', 'production_companies',
              'URL',
              'Abstract']]
 
@@ -44,8 +45,6 @@ class WikiMovieDBLoader:
                                 'URL': 'wikipedia_page_url',
                                 'Abstract': 'wikipedia_abstract'
                                 })
-
-        print(df.columns)
         return df
 
     def drop_existing_table(self, engine):
