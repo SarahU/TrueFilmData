@@ -6,7 +6,7 @@ MOVIES_PATH = './data/3405_6663_compressed_movies_metadata.csv.zip'
 class MovieDataSource:
 
     def get_data(self):
-        movie_data = pd.read_csv(MOVIES_PATH, compression='zip', converters={'title': str})
+        movie_data = pd.read_csv(MOVIES_PATH, compression='zip', parse_dates=['release_date'])
 
         movie_data = movie_data.drop_duplicates()
         movie_data = movie_data.drop(movie_data[movie_data.imdb_id == '0'].index)
