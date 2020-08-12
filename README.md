@@ -1,10 +1,13 @@
 ##**How to run:**
 
+I did not upload the data. Please place the 2 files in a folder called `data` at root level.
+
 ###There are 2 applications:
 
 #####Wikipedia Parser (wikpedia_data_feed.py)
 You can run this by calling the app with argument `W`
-python ./TrueFilmData/main.py W
+From TrueFilmData
+`python main.py W`
 
 #####Postgres Movie loader (postgres_movie_feed.py)
 Its just a movie loader but I want to be clear it was for a Postgres DB. This can be generalised if needed but that was not required in this case.
@@ -17,13 +20,15 @@ and then the above run command will start a contain with the postgres image. Not
 Python - please install Python for your operating system.
 
 You can run this by calling the app with argument `I`
-python ./TrueFilmData/main.py W
+From TrueFilmData
+`python main.py W`
 
 ####Query the data
 You can either query the data in Python via the Movie Data Source class or you check the database
 `select * from top_movies` will provide the 1000 movies that had the largest budget to revenue ratio
 You can run the budget to revenue ration report using:
-`python ./TrueFilmData/main.py R`
+From TrueFilmData
+`python main.py R`
 
 ###My Process & Thoughts:
 
@@ -75,10 +80,10 @@ I pulled out a few unit tests as I went.
 I left the integration and unit tests together as well having the unit tests using the 'prod' location, like the database but I replace these with either mocks, files or dev databases.
 I haven't done this here due to time.
 
-####Structure
+####Iterating
 
 I iterated a few times as I built out the functionality. Ultimately I came out with one class that
-provide access to the sources and queries in those sources and 2 feeds that can be run:
+provide access to the sources and queries in those sources, and 2 feeds that can be run as jobs:
 1 - Wikipedia movie process - this could be run as needed. 
 The amount of movie data actually needed is a small subset of the data available in this file.
 There is no need to run this everytime you would need to query movie data, so hence this is a separated process.
@@ -105,7 +110,8 @@ was not capable of the customisation we needed.
 
 Docker for Postgres because it was easier to get a database up and running on my machine
 
-Algorithms - I have favoured space usage over time. You would be able to make use of threads (in a multi-threaded language) 
-to perform different processes (ie reading from files, transforming, writing to output from a queue).
+Algorithms - I have favoured space usage over time.
 I tried unzipping the file first and then processing it as well as the current configuration. I think the former was slightly faster.
 I think this is acceptable especially if you know that the file sizes will be fairly uniform. 
+To optimise this, you would be able to make use of threads (in a multi-threaded language) 
+to perform different processes (ie reading from files, transforming, writing to output from a queue).

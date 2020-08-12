@@ -41,18 +41,12 @@ if __name__ == '__main__':
 
     movie_data_source = MovieDataSource()
 
-    while ans != 'Q':
-        if args.job == 'I':
-            run_db_reload_job()
-            break
-        if args.job == 'W':
-            run_wikipedia_job()
-            break
-        if args.job == 'R':
-            print('Budget to Revenue Ratio')
-            print(movie_data_source.get_data_with_budget_vs_revenue())
-            break
-
-        ans = input('Press Q to quit')
+    if args.job == 'I':
+        run_db_reload_job()
+    if args.job == 'W':
+        run_wikipedia_job()
+    if args.job == 'R':
+        print('Budget to Revenue Ratio')
+        print(movie_data_source.get_data_with_budget_vs_revenue())
 
 

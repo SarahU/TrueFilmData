@@ -10,18 +10,18 @@ class MovieDataSource:
         return pd.read_csv(WIKIPEDIA_MOVIE_DATA)
 
     def get_imdb_movie_data(self):
-        movie_data = pd.read_csv(IMDB_MOVIE_DATA_PATH, compression='zip', parse_dates=['release_date'])
+        movie_data = pd.read_csv(IMDB_MOVIE_DATA_PATH, compression='zip', parse_dates=['release_date'], low_memory=False)
 
         movie_data = movie_data.drop_duplicates()
         movie_data = movie_data.drop(movie_data[movie_data.imdb_id == '0'].index)
 
         movie_data['revenue'] = movie_data['revenue'].apply(pd.to_numeric)
         revenue_mean = movie_data['revenue'].mean()
-        movie_data['revenue'].loc[movie_data['revenue'] == 0] = revenue_mean
+        movie_data.loc[movie_data['revenue'] == 0, ['revenue']] = revenue_mean
 
         movie_data['budget'] = movie_data['budget'].apply(pd.to_numeric)
         budget_mean = movie_data['budget'].mean()
-        movie_data['budget'].loc[movie_data['budget'] == 0] = budget_mean
+        movie_data.loc[movie_data['budget'] == 0, ['budget']] = budget_mean
 
         return movie_data
 
