@@ -7,10 +7,10 @@ from wikipedia_data_feed import WikipediaDataFeed
 
 class TestWikipediaDataFeed(unittest.TestCase):
     def test_update_wikipedia_data_source(self):
-        movieDataSource = MovieDataSource()
-        feed = WikipediaDataFeed(movieDataSource)
+        movie_data_source = MovieDataSource()
+        feed = WikipediaDataFeed(movie_data_source)
         result = feed.update_wikipedia_data_source()
-        self.assertEqual(29193, len(result))
+        self.assertTrue(result)
 
         data = pd.read_csv('./data/wiki_movie_data.csv')
         self.assertTrue((29193, 3), data.shape)

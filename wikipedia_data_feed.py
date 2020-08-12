@@ -1,8 +1,9 @@
 import xml.etree.ElementTree as ET
 import csv
+import gzip
 
-WIKIPEDIA_DATA_FILE_PATH = './data/enwiki-latest-abstract.xml'
-WIKI_MOVIE_OUTPUT_FILE_PATH = './data/wiki_movie_data.csv'
+WIKIPEDIA_DATA_FILE_PATH = './data/enwiki-latest-abstract.xml.gz'
+WIKI_MOVIE_OUTPUT_FILE_PATH = './data/wikipedia_movie_data.csv'
 
 
 class WikipediaDataFeed:
@@ -10,37 +11,36 @@ class WikipediaDataFeed:
         self.movieSource = movieDataSource
 
     def update_wikipedia_data_source(self):
-        movie_name_list = self.movieSource.read_movie_names()
-        # path = './data/enwiki-latest-abstract.xml.gz'
+        try:
+            movie_name_list = self.movieSource.read_movie_names()
+            element_collection = []
 
-        # with gzip.open(path, 'rb') as f:
-        #     file_content = f.read()
+            with open(WIKI_MOVIE_OUTPUT_FILE_PATH, 'w', encoding="utf-8") as csvfile:
+                csvwriter = csv.writer(csvfile)
+                csvwriter.writerow(['Title', 'Abstract', 'URL'])
 
-        element_collection = []
+                with gzip.open(WIKIPEDIA_DATA_FILE_PATH, 'rb') as gfile:
+                    context = ET.iterparse(gfile, events=("start", "end"))
 
-        with open(WIKI_MOVIE_OUTPUT_FILE_PATH, 'w', encoding="utf-8") as csvfile:
-            csvwriter = csv.writer(csvfile)
-            csvwriter.writerow(['Title', 'Abstract', 'URL'])
+                    event, root = next(context)
 
-            context = ET.iterparse(WIKIPEDIA_DATA_FILE_PATH, events=("start", "end"))
+                    for event, elem in context:
+                        if event == "end" and elem.tag == "doc":
 
-            event, root = next(context)
-            for event, elem in context:
+                            title = elem.find('title').text
+                            title = title.replace('Wikipedia: ', '').strip()
 
-                if event == "end" and elem.tag == "doc":
+                            if title in movie_name_list:
+                                url = elem.find('url').text
+                                abstract = elem.find('abstract').text
+                                element = [title, abstract, url]
+                                element_collection.append(element)
+                                csvwriter.writerow(element)
 
-                    title = elem.find('title').text
-                    title = title.replace('Wikipedia: ', '').strip()
+                            root.clear()
 
-                    if title in movie_name_list:
-                        url = elem.find('url').text
-                        abstract = elem.find('abstract').text
-                        element = [title, abstract, url]
-                        element_collection.append(element)
-                        csvwriter.writerow(element)
+                return True
+        except Exception as e:
+            print("An issue caused the feed to break", e)
+            return False
 
-                    root.clear()
-
-            print(element_collection)
-
-        return element_collection

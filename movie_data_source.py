@@ -1,15 +1,16 @@
 import pandas as pd
 
-MOVIES_PATH = './data/3405_6663_compressed_movies_metadata.csv.zip'
+IMDB_MOVIE_DATA_PATH = './data/3405_6663_compressed_movies_metadata.csv.zip'
+WIKIPEDIA_MOVIE_DATA = './data/wiki_movie_data.csv'
 
 
 class MovieDataSource:
 
     def get_movie_wikipedia_data(self):
-        return pd.read_csv('./data/wiki_movie_data.csv')
+        return pd.read_csv(WIKIPEDIA_MOVIE_DATA)
 
     def get_imdb_movie_data(self):
-        movie_data = pd.read_csv(MOVIES_PATH, compression='zip', parse_dates=['release_date'])
+        movie_data = pd.read_csv(IMDB_MOVIE_DATA_PATH, compression='zip', parse_dates=['release_date'])
 
         movie_data = movie_data.drop_duplicates()
         movie_data = movie_data.drop(movie_data[movie_data.imdb_id == '0'].index)

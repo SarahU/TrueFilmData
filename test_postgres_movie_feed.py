@@ -1,10 +1,10 @@
 import unittest
 
 from movie_data_source import MovieDataSource
-from postgres_movie_feed import WikiMovieDBLoader
+from postgres_movie_feed import ReportingMovieDataDBLoader
 
 movieSource = MovieDataSource()
-loader = WikiMovieDBLoader(movieSource)
+loader = ReportingMovieDataDBLoader(movieSource)
 
 
 class TestPostgresMovieFeed(unittest.TestCase):

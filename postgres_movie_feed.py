@@ -1,12 +1,12 @@
 from datetime import datetime
-from sqlalchemy import create_engine, MetaData, Table, Column, Float, Integer, String, inspect
-import pandas as pd
+from sqlalchemy import create_engine, MetaData, Table, inspect
 
 TOP_MOVES_TABLE = "top_movies"
 FAKE_YEAR_PLACEHOLDER = 1111
+DB_CONNECTION_STRING = 'postgresql://postgres:docker@localhost:5432/postgres'
 
 
-class WikiMovieDBLoader:
+class ReportingMovieDataDBLoader:
     def __init__(self, moviesDataSource):
         self.movieSource = moviesDataSource
 
@@ -56,7 +56,7 @@ class WikiMovieDBLoader:
 
     def load_top_movies_into_db(self):
         try:
-            engine = create_engine('postgresql://postgres:docker@localhost:5432/postgres')
+            engine = create_engine(DB_CONNECTION_STRING)
             self.drop_existing_table(engine)
 
             df = self.get_by_highest_to_lowest_ratio_top_1000()
