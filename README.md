@@ -26,6 +26,8 @@ From TrueFilmData
 ####Query the data
 You can either query the data in Python via the Movie Data Source class or you check the database
 `select * from top_movies` will provide the 1000 movies that had the largest budget to revenue ratio
+
+
 You can run the budget to revenue ration report using:
 From TrueFilmData
 `python main.py R`
@@ -33,9 +35,10 @@ From TrueFilmData
 ###My Process & Thoughts:
 
 ####Explore the data 
-Have a look at the data and see what we are working with. I'm currently on Windows so I opened the movie data in Excel to have a glance. I noticied a few oddities but nothing too bad.
+Had a look at the data and see what we are working with. I'm currently on Windows so I opened the IMDB movie data in Excel to have a glance. I noticed a few oddities but nothing too bad.
 Then I started looking at the data for the 1st query and discovered some data that need cleaning and coercing.
-given the only semi-complete data, the budget and revenue data was updated by using the mean values. This is a normal practice to clean-up and normalise the data, especially for using in machine learning, to reduce anomolies, but of course this needs to be a discussion with the analyst/ stakeholder
+Given the only semi-complete data, the budget and revenue data was updated by using the mean values. This is a normal practice to clean-up and normalise the data, especially for using in machine learning, to reduce anomolies, 
+but of course this needs to be a discussion with the analyst/ stakeholder.
 
 Look at ids & title columns - are they unique?
 
@@ -45,7 +48,7 @@ Other rows have bad data. This is especially true for the row where `imdb_id = 0
 
 
 Wikipedia file is quite large and contains far more info than is needed.
-Definitely worth pre-processing.
+Definitely worth pre-processing so that you don't need to read the full set in, every time you are working with the movie data.
 
 The Wikipedia articles can have duplicate entries for the same names ie the name of a movie could be based on a book of the same movie
 Wikipedia is sorted by title
@@ -57,13 +60,14 @@ you may need to make use of the link/sublinks to see if a film is mentioned or s
 
 ####Clean the data
 Movies - remove the data that is obviously bad - many missing values, data in the wrong columns, etc
-I applied some common sense and known practices but mostly you would go through this with an analyst / data subject expert and discuss
+I applied some common sense and known practices but you would (should!) go through this with an analyst / data subject expert and discuss
 reasonable adjustments to the data. As it is, I do the following:
 1 - Remove duplicate entries 
 2 - Remove lines with an imdb if of zero - I noticed these rows were all bad data
 3 - As the revenue and budget data was relevant to this exercise, I thought I would apply a simple but common process which 
-replaces a 0 value with a value that represents the mean of the values in that column. I can see that this is not enough and you'd need to go further 
-if you want to mimic realistic values for these fields but this is a start :) There are many ways to try and make bad data more useful.
+replaces a 0 value with a value that represents the mean of the values in that column. To avoid the division by 0 downstream (when calculating the ratio)
+these rows with 0 budget need to be updated or removed so I updated them.
+I can see that this is not enough and you'd need to go further if you want to mimic realistic values for these fields but this is a start :) There are many ways to try and make bad data more useful.
 
 
 Wikipedia - data is questionable but good enough to work with.
@@ -79,6 +83,16 @@ These can also test the counts of rows are within a range if you expect some flu
 I pulled out a few unit tests as I went.
 I left the integration and unit tests together as well having the unit tests using the 'prod' location, like the database but I replace these with either mocks, files or dev databases.
 I haven't done this here due to time.
+
+To test for correctness, there are a couple of things you can do (and are being done in the tests now).
+You can search for quantitative results like expected numbers of rows and columns.
+You can ensure that data can actually reach the destinations required
+Building out tests for queries helps identify columns that are problematic so try to query the data form different angels.
+
+Qualitative testing involves working with stakeholders to iterate over the outcome (and write tests along the way - making quantitative tests as you go)
+to get the data to a good state. Ultimately someone needs to look at the quality of the data and ensure it will work for their use cases.
+
+in addition, you can monitor the jobs and alert on unusual behaviour ie missing files.
 
 ####Iterating
 
@@ -97,16 +111,30 @@ Readability over optimisation until you have a good reason to.
 This step could be chained onto an update of either source (imdb or wikpedia) which could well run at different intervals so no need to tie them together :)
 I assumed for this that there wouldn't be checking of data and concerns around data in the sources being removed, that you want to retain, so the whole table is re-created everytime.
 
+#### Things I'm aware of but did not tackle yet
+Some date had different formats. TH date function needs to be updated to cater for those
+Production companies - according to the end results, this should be a singular field although there were multiple
+values in a map in the column itself. For this you'd need to decide on some logic to choose the top one, merge them or something else.
+For now I passed the list through as is (one would iterate on this in production)
+I assumed that the voter-average was the rating.
+I choose to use `title` as opposed to `original_title`
+I assumed Wikipedia data would not be frequently updated, and we're especially only interested in a subset of it, so
+a process that runs once weekly, does not need to be as optimal as a mor frequently process.
+Wikipedia matching is not optimal and even wrong - see Abraham Lincoln. This is would 'massaged' out iteratively in
+testing with the user
+
 ####Tech Choices
 Python. 
 I wrote all the jobs in Python because:
 1 - it's my most recently familiar language
-2 - It keeps the jobs consistent and would be an easier transition for a dev.
+2 - It keeps the jobs consistent - I would only use another tool if really necessary and/or it's consistent with the other tools already in use in the team.
 3 - Python offers useful data libraries in it's eco-system which are especially useful for cleaning up messy data. It also could be easily ported to a notebook
 That being said, it's XML processing is not very sophisticated and I can see the value in other languages that have better tooling for this particular job. 
 For this exercise I decided to stick with a consistent approach as it's my preferred approach and I would only change this if needed. For example, in a previous system, we have 1 Spark job in Java because the Pyspark job
-was not capable of the customisation we needed.
+was not capable of the customisation we needed. If this is a infrequently updated file and the time is ok, then no need to change but if this is not the case, 
+another mechanism should be tested :)
 4 - libraries chosen. I tried to stick with standard and familiar libraries (though I'm sure even that is subjective :) 
+and I chose them for their effectiveness at the task.
 
 Docker for Postgres because it was easier to get a database up and running on my machine
 
@@ -115,3 +143,6 @@ I tried unzipping the file first and then processing it as well as the current c
 I think this is acceptable especially if you know that the file sizes will be fairly uniform. 
 To optimise this, you would be able to make use of threads (in a multi-threaded language) 
 to perform different processes (ie reading from files, transforming, writing to output from a queue).
+
+I purposefully go record by record and use `find` to retrieve the url & abstract. This could certainly be optimised but 
+I think this paradigm is easier ti understand for someone reading the code as opposed to building up the records outside of the reading of each line.
